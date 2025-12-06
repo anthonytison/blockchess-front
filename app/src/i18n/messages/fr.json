@@ -1,0 +1,349 @@
+{
+	"page": {
+		"home": {
+			"header": "",
+			"title": "♘ BlockChess",
+			"description": "Joue aux échecs sur la blockchain SUI",
+			"keywords": ["échecs", "blockchain", "jeu", "SUI", "Move", "web3", "décentralisé"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"history": {
+			"header": "Historique des parties",
+			"title": "♘ BlockChess | Historique des parties",
+			"description": "Continue de jouer ou retrouve les parties des joueurs en ligne",
+			"keywords": ["échecs", "historique", "reprendre partie", "échecs blockchain", "SUI"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"profile": {
+			"header": "Profil",
+			"title": "♘ BlockChess | Profil",
+			"description": "Gère ton profil de gamer",
+			"keywords": ["profil", "profil utilisateur", "joueur d'échecs", "jeu blockchain"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"rewards": {
+			"header": "Récompenses",
+			"title": "♘ BlockChess | Récompenses",
+			"description": "Retrouve toutes les récompenses acquises ou à acquérir",
+			"keywords": ["récompenses", "badges", "NFT", "succès", "récompenses blockchain"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"game": {
+			"header": "Partie",
+			"title": "♘ BlockChess | Partie",
+			"description": "Joue ou revisionne ta partie",
+			"keywords": ["partie d'échecs", "jouer aux échecs", "échecs blockchain", "jeu SUI"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		}
+	},
+	"events": {
+		"title": "Evènements sur la blockchain",
+		"transactionDetails": "Détails de la transaction",
+		"transaction": "transaction",
+		"transactions": "transactions",
+		"by": "par",
+		"of": "sur",
+		"type": {
+			"gamecreated": "Création de la partie",
+			"moveplayed": "Mouvement joué",
+			"gameended": "Partie gagnée"
+		}
+	},
+	"navigation": {
+		"home": "Accueil",
+		"newGame": "Nouvelle Partie",
+		"history": "Historique",
+		"settings": "Paramètres",
+		"back": "Retour",
+		"profile": "Profil",
+		"rewards": "Récompenses",
+		"account": "Compte",
+		"connect": "Se connecter",
+		"disconnect": "Se déconnecter",
+		"goHome": "Retour à la page d'accueil",
+		"openMenu": "Ouvrir le menu",
+		"closeMenu": "Fermer le menu",
+		"menu": "Menu de navigation",
+		"wallet": "Portefeuille",
+		"language": "Langue",
+		"theme": "Thème"
+	},
+	"common": {
+		"loading": "Chargement...",
+		"error": "Erreur",
+		"success": "Succès",
+		"cancel": "Annuler",
+		"confirm": "Confirmer",
+		"back": "Retour",
+		"next": "Suivant",
+		"previous": "Précédent",
+		"finish": "Terminer",
+		"optional": "Optionnel",
+		"soon": "Bientôt"
+	},
+	"auth": {
+		"connect": "Se connecter",
+		"connectDisabled": "Connectez votre wallet pour commencer une partie",
+		"connection_required_listing": "Connectez-vous pour afficher votre historique"
+	},
+	"game": {
+		"title": "BLOCKCHESS",
+		"subtitle": "Joue aux échecs sur la blockchain",
+		"startGame": "Commencer la partie",
+		"history": "Historique",
+		"newGame": "Nouvelle Partie",
+		"resign": "Abandonner",
+		"draw": "Proposer un match nul",
+		"soloGame": "Jeu solo",
+		"versusGame": "Jeu à deux",
+		"loading": "Chargement du jeu",
+		"setup": {
+			"title": "Configuration de la Partie",
+			"description": "Configurez votre partie d'échecs",
+			"step": "Étape {current} sur {total}",
+			"previous": "Précédent",
+			"next": "Suivant",
+			"finish": "Finaliser",
+			"subtitle": "Confirmer et commencer",
+			"loading": "Chargement",
+			"review": {
+				"title": "Vérifier la configuration du jeu avant de commencer",
+				"game_mode": "Mode de jeu",
+				"versus_hal": "contre HAL",
+				"players": "Joueurs",
+				"color": "Votre couleur",
+				"timer": "Temps",
+				"password": "Mot de passe",
+				"yes": "Oui",
+				"difficulty": "Difficulté"
+			},
+			"difficulty": {
+				"title": "Difficulté du l'IA",
+				"easy": {
+					"title": "Facile",
+					"subtitle": "Mouvements aléatoires. Parfait pour les débutants"
+				},
+				"intermediate": {
+					"title": "Intermédiaire",
+					"subtitle": "Stratégie basique. Bien pour apprendre"
+				},
+				"hard": {
+					"title": "Difficile",
+					"subtitle": "Stratégie avancée. Adversaire redoutable"
+				}
+			},
+			"mode": {
+				"title": "Choisir le Mode de Jeu",
+				"solo": "Solo contre HAL",
+				"vs": "Contre Joueur Local",
+				"soloDescription": "Jouer contre HAL",
+				"vsDescription": "Jouer contre une autre personne"
+			},
+			"players": {
+				"title": "Noms des Joueurs",
+				"player1": "Joueur 1 (Blancs)",
+				"player2": "Joueur 2 (Noirs)",
+				"player1Placeholder": "Entrez le nom du joueur 1",
+				"player2Placeholder": "Entrez le nom du joueur 2"
+			},
+			"color": {
+				"title": "Choisissez Votre Couleur",
+				"white": "Jouer avec les Blancs",
+				"black": "Jouer avec les Noirs",
+				"random": "Couleur Aléatoire"
+			},
+			"timer": {
+				"title": "Paramètres du Chrono",
+				"none": "Pas de Chrono",
+				"3min": "3 Minutes",
+				"10min": "10 Minutes",
+				"1h": "1 Heure",
+				"custom": "Chrono Personnalisé",
+				"hours": "Heures",
+				"minutes": "Minutes",
+				"seconds": "Secondes"
+			},
+			"password": {
+				"warning": "Cela vous permettra de continuer le jeu plus tard",
+				"title": "Protection de la Partie",
+				"description": "Définir un mot de passe pour protéger votre partie (optionnel)",
+				"placeholder": "Entrez le mot de passe",
+				"resume": "Reprendre Partie Protégée",
+				"resumeDescription": "Entrez le mot de passe pour reprendre votre partie",
+				"optional": "Optionnel"
+			}
+		},
+		"board": {
+			"currentTurn": "Tour de {player}",
+			"captured": "Pièces Capturées",
+			"moveHistory": "Historique des Coups",
+			"noMoves": "Aucun coup encore"
+		},
+		"player": {
+			"you": "Vous",
+			"white": "Blanc",
+			"black": "Noir",
+			"computer": "HAL",
+			"player1": "Joueur 1",
+			"player2": "Joueur 2",
+			"unknown": "Joueur inconnu"
+		},
+		"status": {
+			"check": "Échec !",
+			"checkmate": "Échec et Mat !",
+			"stalemate": "Pat !",
+			"draw": "Match nul !",
+			"inProgress": "Partie en cours",
+			"winner": "{player} a gagné !",
+			"noMoves": "Pas encore de déplacement"
+		},
+		"controls": {
+			"title": "Contrôles de Jeu",
+			"stepBack": "Coup Précédent",
+			"stepForward": "Coup Suivant",
+			"goToStart": "Aller au Début",
+			"goToCurrent": "Aller à Actuel",
+			"replay": "Mode rediffusion",
+			"live": "Partie en direct",
+			"movesHistory": "Historique des déplacements",
+			"replayControls": "Rejouer les déplacements",
+			"move": "Déplacement",
+			"start": "Début",
+			"current": "Actuel"
+		},
+		"timer": {
+			"title": "Chrono",
+			"noTimer": "Pas de chrono",
+			"runningOut": "Vous allez manquez de temps!",
+			"turn": "Au tour de {player}"
+		},
+		"turn": {
+			"title": "Tour en cours",
+			"playingAs": "Jouant en {color}"
+		},
+		"captured": {
+			"title": "Pièces capturées",
+			"noPieces": "Pas de pièces capturées",
+			"blackPieces": "Pièces noires",
+			"whitePieces": "Pièces blanches"
+		},
+		"actions": {
+			"title": "Actions",
+			"resign": "Renoncer",
+			"offerDraw": "Proposer un match nul"
+		},
+		"events": {
+			"computer": {
+				"move": "HAL est en train de jouer",
+				"thinking": "HAL réfléchi",
+				"turn": "À HAL de jouer"
+			}
+		},
+		"promotion": {
+			"title": "Choisissez une pièce pour promouvoir votre pion",
+			"pieces": {
+				"queen": "Dame",
+				"rook": "Tour",
+				"bishop": "Fou",
+				"knight": "Cavalier"
+			}
+		},
+		"leaveGame": {
+			"title": "Quitter la partie ?",
+			"description": "Quitter maintenant entraînera l'abandon de la partie et votre adversaire gagnera. Êtes-vous sûr de vouloir continuer ?",
+			"confirm": "Oui, quitter",
+			"cancel": "Non, rester"
+		}
+	},
+	"history": {
+		"title": "Historique des Parties",
+		"noGames": "Aucune partie trouvée",
+		"noGamesDescription": "Commencez à jouer pour voir votre historique ici",
+		"search": {
+			"placeholder": "Rechercher par nom de joueur...",
+			"noMatch": "Aucune partie ne correspond à votre recherche"
+		},
+		"startPlaying": "Commencez à jouer pour visualiser votre partie ici.",
+		"columns": {
+			"date": "Date",
+			"mode": "Mode",
+			"players": "Joueurs",
+			"winner": "Gagnant",
+			"moves": "Coups",
+			"actions": "Actions"
+		},
+		"move": "coup",
+		"loading": "Chargement des parties",
+		"viewReplay": "Voir Replay",
+		"viewGame": "Voir la partie",
+		"resume": "Reprendre Partie",
+		"status": "Statut",
+		"modes": {
+			"solo": "Solo",
+			"vs": "Versus"
+		}
+	},
+	"blockchain": {
+		"checkingWalletConnection": "Vérification de la connexion au Wallet",
+		"connectionRequired": "Connexion au wallet requise",
+		"pleaseConnect": "Pour jouer et enregistrer vos mouvements sur la blockhain, veuillez connecter votre wallet en utilisant le bouton en haut à droite.",
+		"purpose": "En mode solo, votre wallet sera utilisé pour enregistrer vos mouvements ainsi que ceux de l'AI sur la blockchain.",
+		"prompt": "Votre wallet va apparaître pour enregistrer ce mouvement sur la blockchain.",
+		"using": "Utilisant"
+	},
+	"errors": {
+		"error": "Erreur",
+		"transactionFailed": "Transaction échouée",
+		"objectNotFound": "Objet non trouvé dans la transaction",
+		"gameObjectNotFound": "La partie n'a pas été trouvée dans la transaction",
+		"badgeObjectNotFound": "Badge non trouvé dans la transaction",
+		"gameNotFound": "Partie non trouvée",
+		"loadGame": "Erreur lors du chargement de la partie",
+		"loadGames": "Erreur lors du chargement des parties",
+		"invalidMove": "Coup invalide",
+		"tryAgain": "Recommencez",
+		"networkError": "Erreur réseau",
+		"validationError": "Veuillez vérifier votre saisie",
+		"failedCreateGame": "Echec lors de la création du jeu",
+		"failedCreateGameBlockchain": "Echec lors de la création du jeu sur la blockchain"
+	},
+	"toast": {
+		"gameCreated": "Partie créée avec succès",
+		"gameEnded": "Partie terminée avec succès",
+		"gameForfeited": "Partie perdue par abandon",
+		"forfeitFailed": "Échec de l'abandon de la partie",
+		"nftMinted": "NFT récompense ({type}) créé avec succès",
+		"transactionFailed": "Transaction échouée",
+		"moveFailed": "Échec du mouvement"
+	},
+	"rewards": {
+		"title": "Récompenses",
+		"earned": "Récompenses Obtenues",
+		"available": "Récompenses Disponibles",
+		"earnedCount": "{count} sur {total} obtenues",
+		"earnedAt": "Obtenu le",
+		"viewTransaction": "Voir la Transaction",
+		"transactionDetails": "Détails de la Transaction",
+		"transactionHash": "Hash de la Transaction",
+		"blockNumber": "Numéro de Bloc",
+		"timestamp": "Horodatage",
+		"sender": "Expéditeur",
+		"recipient": "Destinataire",
+		"transactionNotFound": "Transaction introuvable",
+		"createdAt": "Créé le",
+		"transactionInfo": "Informations de Transaction",
+		"gasFee": "Frais de Gas",
+		"rawTransaction": "Données Brutes de Transaction",
+		"statistics": {
+			"totalGames": "Total des Parties",
+			"gamesWon": "Parties Gagnées",
+			"gamesLost": "Parties Perdues",
+			"gamesDraw": "Parties Nulles"
+		}
+	}
+}

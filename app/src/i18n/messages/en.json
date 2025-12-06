@@ -1,0 +1,350 @@
+{
+	"page": {
+		"home": {
+			"header": "",
+			"title": "♘ BlockChess",
+			"description": "Play chess on the SUI Blockchain",
+			"keywords": ["chess", "blockchain", "game", "SUI", "Move", "web3", "decentralized"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"history": {
+			"header": "Games history",
+			"title": "♘ BlockChess | Games history",
+			"description": "Resume your game or find other players games",
+			"keywords": ["chess", "game history", "resume game", "blockchain chess", "SUI"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"profile": {
+			"header": "Profile",
+			"title": "♘ BlockChess | Profile",
+			"description": "Manage your gaming profile",
+			"keywords": ["profile", "user profile", "chess player", "blockchain gaming"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"rewards": {
+			"header": "Rewards",
+			"title": "♘ BlockChess | Rewards",
+			"description": "Find here all your rewards or the future ones",
+			"keywords": ["rewards", "badges", "NFT", "achievements", "blockchain rewards"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		},
+		"game": {
+			"header": "Game",
+			"title": "♘ BlockChess | Game",
+			"description": "[Re]Play your game",
+			"keywords": ["chess game", "play chess", "blockchain chess", "SUI game"],
+			"ogImage": "/brand.png",
+			"ogType": "website"
+		}
+	},
+	"events": {
+		"title": "Blochain events",
+		"transactionDetails": "Transaction details",
+		"transaction": "transaction",
+		"transactions": "transactions",
+		"by": "by",
+		"of": "of",
+		"type": {
+			"gamecreated": "Game created",
+			"moveplayed": "Move played",
+			"gameended": "Game won"
+		}
+	},
+	"navigation": {
+		"home": "Home",
+		"newGame": "New Game",
+		"history": "History",
+		"settings": "Settings",
+		"back": "Back",
+		"profile": "Profile",
+		"rewards": "Rewards",
+		"account": "Account",
+		"connect": "Connect",
+		"disconnect": "Disconnect",
+		"goHome": "Back home",
+		"openMenu": "Open menu",
+		"closeMenu": "Close menu",
+		"menu": "Navigation menu",
+		"wallet": "Wallet",
+		"language": "Language",
+		"theme": "Theme"
+	},
+	"common": {
+		"loading": "Loading...",
+		"error": "Error",
+		"success": "Success",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"back": "Back",
+		"next": "Next",
+		"previous": "Previous",
+		"finish": "Finish",
+		"optional": "Optional",
+		"soon": "soon"
+	},
+	"auth": {
+		"connect": "Connect",
+		"connectDisabled": "Connect your wallet to start a game",
+		"connection_required_listing": "Get connected for checking your history"
+	},
+	"game": {
+		"title": "BLOCKCHESS",
+		"subtitle": "Play chess on the blockchain",
+		"startGame": "Start the game",
+		"history": "History",
+		"newGame": "New Game",
+		"resign": "Resign",
+		"draw": "Offer Draw",
+		"soloGame": "Solo game",
+		"versusGame": "Versus game",
+		"loading": "Loading game",
+		"setup": {
+			"title": "Game Setup",
+			"description": "Configure your chess game",
+			"step": "Step {current} of {total}",
+			"previous": "Previous",
+			"next": "Next",
+			"finish": "finish",
+			"subtitle": "Confirm & Start",
+			"loading": "Loading",
+			"review": {
+				"title": "Please review your game settings before starting",
+				"game_mode": "Game mode",
+				"versus_hal": "vs HAL",
+				"players": "Players",
+				"color": "Your color",
+				"timer": "Timer",
+				"password": "Password",
+				"yes": "Yes",
+				"difficulty": "Difficulty"
+			},
+			"difficulty": {
+				"title": "AI Difficulty",
+				"easy": {
+					"title": "Easy",
+					"subtitle": "Random moves - Perfect for beginners"
+				},
+				"intermediate": {
+					"title": "Intermediate",
+					"subtitle": "Basic strategy - Good for learning"
+				},
+				"hard": {
+					"title": "Hard",
+					"subtitle": "Advanced strategy - Challenging opponent"
+				}
+			},
+			"mode": {
+				"title": "Choose Game Mode",
+				"solo": "Solo vs HAL",
+				"vs": "Versus Local Player",
+				"soloDescription": "Play against HAL",
+				"vsDescription": "Play against another person"
+			},
+			"players": {
+				"title": "Player Names",
+				"player1": "Player 1 (White)",
+				"player2": "Player 2 (Black)",
+				"player1Placeholder": "Enter player 1 name",
+				"player2Placeholder": "Enter player 2 name"
+			},
+			"color": {
+				"title": "Choose Your Color",
+				"white": "Play as White",
+				"black": "Play as Black",
+				"random": "Random Color"
+			},
+			"timer": {
+				"title": "Timer Settings",
+				"none": "No Timer",
+				"3min": "3 Minutes",
+				"10min": "10 Minutes",
+				"1h": "1 Hour",
+				"custom": "Custom Timer",
+				"hours": "Hours",
+				"minutes": "Minutes",
+				"seconds": "Seconds"
+			},
+			"password": {
+				"warning": "This will allow you to resume your game later",
+				"title": "Game Protection",
+				"description": "Set a password to protect your game (optional)",
+				"placeholder": "Enter password",
+				"resume": "Resume Protected Game",
+				"resumeDescription": "Enter the password to resume your game",
+				"optional": "Optional"
+			}
+		},
+		"board": {
+			"currentTurn": "{player}'s turn",
+			"captured": "Captured Pieces",
+			"moveHistory": "Move History",
+			"noMoves": "No moves yet"
+		},
+		"player": {
+			"you": "You",
+			"white": "White",
+			"black": "Black",
+			"computer": "HAL",
+			"player1": "Player 1",
+			"player2": "Player 2",
+			"unknown": "Unknown player"
+		},
+		"status": {
+			"check": "Check!",
+			"checkmate": "Checkmate!",
+			"stalemate": "Stalemate!",
+			"draw": "Draw!",
+			"inProgress": "Game in progress",
+			"winner": "{player} won!",
+			"noMoves": "No move yet"
+		},
+		"controls": {
+			"title": "Game Controls",
+			"stepBack": "Step Back",
+			"stepForward": "Step Forward",
+			"goToStart": "Go to Start",
+			"goToCurrent": "Go to Current",
+			"replay": "Replay Mode",
+			"live": "Live Game",
+			"movesHistory": "Moves history",
+			"replayControls": "Replay moves",
+			"move": "Move",
+			"start": "Start",
+			"current": "Current"
+		},
+		"timer": {
+			"title": "Timer",
+			"noTimer": "No timer set",
+			"runningOut": "Time running out!",
+			"turn": "{player}'s turn"
+		},
+		"turn": {
+			"title": "Current turn",
+			"playingAs": "Playing as {color}"
+		},
+		"captured": {
+			"title": "Captured pieces",
+			"noPieces": "No pieces captured",
+			"blackPieces": "Black pieces",
+			"whitePieces": "White pieces"
+		},
+		"actions": {
+			"title": "Actions",
+			"resign": "Resign",
+			"offerDraw": "Offer draw"
+		},
+		"events": {
+			"computer": {
+				"move": "HAL is making a move",
+				"thinking": "HAL is thinking",
+				"turn": "HAL's turn"
+			}
+		},
+		"promotion": {
+			"title": "Choose a piece to promote your pawn",
+			"pieces": {
+				"queen": "Queen",
+				"rook": "Rook",
+				"bishop": "Bishop",
+				"knight": "Knight"
+			}
+		},
+		"leaveGame": {
+			"title": "Leave Game?",
+			"description": "Leaving now will forfeit the game and your opponent will win. Are you sure you want to continue?",
+			"confirm": "Yes, Leave",
+			"cancel": "No, Stay"
+		}
+	},
+	"history": {
+		"title": "Game History",
+		"noGames": "No games found",
+		"noGamesDescription": "Start playing to see your game history here",
+		"search": {
+			"placeholder": "Search games by player name...",
+			"noMatch": "No games match your search."
+		},
+		"startPlaying": "Start playing to see your game history here.",
+		"columns": {
+			"date": "Date",
+			"mode": "Mode",
+			"players": "Players",
+			"winner": "Winner",
+			"moves": "Moves",
+			"actions": "Actions"
+		},
+		"move": "move",
+		"loading": "Loading games",
+		"viewReplay": "View Replay",
+		"viewGame": "View the game",
+		"resume": "Resume Game",
+		"status": "Status",
+		"modes": {
+			"solo": "Solo",
+			"vs": "Versus"
+		}
+	},
+	"blockchain": {
+		"checkingWalletConnection": "Checking wallet connection",
+		"connectionRequired": "Wallet connection required",
+		"pleaseConnect": "To play and record your moves on the blockchain, please connect your wallet using the button in the top-right corner.",
+		"purpose": "In solo mode, your wallet will be used to record both your moves and the AI&apos;s moves on the blockchain.",
+		"prompt": "Your wallet will be prompted to record this move on the blockchain.",
+		"using": "Using"
+	},
+	"errors": {
+		"error": "Error",
+		"transactionFailed": "Transaction failed",
+		"objectNotFound": "Object not found in transaction",
+		"gameObjectNotFound": "Game object not found in transaction",
+		"badgeObjectNotFound": "Badge object not found in transaction",
+		"gameNotFound": "Game not found",
+		"loadGame": "Failed to load game",
+		"loadGames": "Failed to load games",
+		"invalidMove": "Invalid move",
+		"tryAgain": "Try again",
+		"networkError": "Network error occurred",
+		"validationError": "Please check your input",
+		"failedCreateGame": "Failed to create game",
+		"failedCreateGameBlockchain": "Failed to create game on the blockchain"
+	},
+	"toast": {
+		"gameCreated": "Game created successfully",
+		"gameEnded": "Game ended successfully",
+		"gameForfeited": "Game forfeited",
+		"forfeitFailed": "Failed to forfeit game",
+		"nftMinted": "NFT reward ({type}) minted successfully",
+		"transactionFailed": "Transaction failed",
+		"moveFailed": "Failed to make move"
+	},
+	"rewards": {
+		"title": "Rewards",
+		"earned": "Earned Rewards",
+		"available": "Available Rewards",
+		"earnedCount": "{count} of {total} earned",
+		"earnedAt": "Earned",
+		"viewTransaction": "View Transaction",
+		"transactionDetails": "Transaction Details",
+		"transactionHash": "Transaction Hash",
+		"blockNumber": "Block Number",
+		"timestamp": "Timestamp",
+		"sender": "Sender",
+		"recipient": "Recipient",
+		"transactionNotFound": "Transaction not found",
+		"transactionNotAvailable": "Transaction details are not available. The transaction may not be indexed yet or may not exist on this network.",
+		"createdAt": "Created",
+		"transactionInfo": "Transaction Information",
+		"gasFee": "Gas Fee",
+		"rawTransaction": "Raw Transaction Data",
+		"statistics": {
+			"totalGames": "Total Games",
+			"gamesWon": "Games Won",
+			"gamesLost": "Games Lost",
+			"gamesDraw": "Games Draw"
+		}
+	}
+}

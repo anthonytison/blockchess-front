@@ -1,0 +1,97 @@
+# .aiignore - Files and directories that should not be modified by AI tools
+# This file helps prevent AI from making unwanted changes to critical project files
+
+# Build outputs and generated files
+**/build/
+**/dist/
+**/.next/
+**/out/
+**/node_modules/
+**/.cache/
+**/coverage/
+**/.turbo/
+**/tsconfig.tsbuildinfo
+
+# Database files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/data/*.db
+blockchess.db
+blockchess.db
+
+# Environment and secrets
+**/.env
+**/.env.local
+**/.env.*.local
+**/.secrets
+**/secrets/
+
+# Lock files (package managers)
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+**/Move.lock
+
+# IDE and editor files
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/.DS_Store
+**/Thumbs.db
+
+# Logs
+**/logs/
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Testing
+**/e2e/.auth/
+**/playwright-report/
+**/test-results/
+
+# Docker
+**/docker-compose.override.yml
+
+# Migration files (database schema changes should be manual)
+**/migrations/*.sql
+
+# Blockchain build artifacts
+**/back/**/build/
+**/back/**/Move.lock
+
+# Documentation that should be manually maintained
+**/MARKDOWNS/
+**/TODO.md
+**/README.md
+**/*_AUDIT.md
+**/*_COMPLIANCE*.md
+**/*_SUMMARY.md
+
+# Configuration files that require careful review
+**/next.config.ts
+**/tailwind.config.ts
+**/tsconfig.json
+**/playwright.config.ts
+**/jest.config.js
+**/lighthouserc.json
+
+# Public assets (images, fonts, etc.)
+**/public/**/*.png
+**/public/**/*.jpg
+**/public/**/*.jpeg
+**/public/**/*.gif
+**/public/**/*.svg
+**/public/**/*.ico
+**/design/
+
+# Server files
+**/server.ts
+
+# Scripts that manage critical operations
+**/scripts/migrate*.js
+**/scripts/process-mint-queue.js
+

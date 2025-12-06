@@ -1,0 +1,31 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3050/",
+        "http://localhost:3050/game",
+        "http://localhost:3050/history"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop",
+        "throttling": {
+          "rttMs": 40,
+          "throughputKbps": 10240,
+          "cpuSlowdownMultiplier": 1
+        }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", {"minScore": 0.8}],
+        "categories:accessibility": ["error", {"minScore": 0.9}],
+        "categories:best-practices": ["error", {"minScore": 0.85}],
+        "categories:seo": ["error", {"minScore": 0.85}]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

@@ -1,0 +1,374 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-regular), system-ui, -apple-system, sans-serif;
+  }
+  
+  /* When pixel font is active (via Konami code), apply to all elements */
+  html.pixel-font-active,
+  html.pixel-font-active * {
+    font-family: var(--font-pixel), monospace !important;
+    /* Keep the same font size as regular font - don't force tiny size */
+  }
+  
+  /* Individual font-pixel class (for explicit use, but overridden by pixel-font-active) */
+  .font-pixel {
+    font-family: var(--font-pixel), monospace;
+    font-size: 0.625rem; /* 10px - xs size */
+  }
+  
+  /* When pixel font is active, override font-pixel class behavior */
+  html.pixel-font-active .font-pixel {
+    font-family: var(--font-pixel), monospace;
+    font-size: 0.625rem;
+  }
+}
+
+/* Chess board specific styles - Updated design */
+.chess-board {
+  @apply grid grid-cols-8 gap-0 border-2 border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden shadow-lg;
+}
+
+.chess-square {
+  @apply aspect-square flex items-center justify-center relative cursor-pointer transition-all duration-200 hover:brightness-110;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.chess-square.light {
+  @apply bg-slate-50 dark:bg-slate-100;
+}
+
+.chess-square.dark {
+  @apply bg-slate-300 dark:bg-slate-400;
+}
+
+.chess-square.selected {
+  @apply ring-2 sm:ring-4 ring-blue-500 ring-inset bg-blue-100 dark:bg-blue-200;
+  /* Ensure focus indicator is always visible for accessibility */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.chess-square.legal-move {
+  @apply after:content-[''] after:absolute after:w-2 after:h-2 sm:after:w-3 sm:after:h-3 after:bg-green-500 after:rounded-full after:opacity-70;
+}
+
+.chess-square.legal-capture {
+  @apply ring-2 sm:ring-4 ring-red-500 ring-inset after:content-[''] after:absolute after:w-full after:h-full after:border-2 sm:after:border-4 after:border-red-500 after:rounded-full after:opacity-50;
+  /* Ensure focus indicator is always visible for accessibility */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.chess-square.last-move {
+  /* Use box-shadow inset to create padding effect and show borders */
+  box-shadow: inset 0 0 0 2px rgba(234, 179, 8, 0.4);
+  background-color: rgba(234, 179, 8, 0.15);
+}
+
+@media (min-width: 640px) {
+  .chess-square.last-move {
+    box-shadow: inset 0 0 0 3px rgba(234, 179, 8, 0.4);
+  }
+}
+
+.dark .chess-square.last-move {
+  box-shadow: inset 0 0 0 2px rgba(234, 179, 8, 0.5);
+  background-color: rgba(234, 179, 8, 0.2);
+}
+
+@media (min-width: 640px) {
+  .dark .chess-square.last-move {
+    box-shadow: inset 0 0 0 3px rgba(234, 179, 8, 0.5);
+  }
+}
+
+/* Piece animations and SVG styling */
+.chess-piece {
+  @apply w-full h-full flex items-center justify-center text-2xl sm:text-3xl md:text-4xl select-none transition-all duration-300 hover:scale-105;
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.chess-piece.moving {
+  @apply z-10 scale-110 drop-shadow-lg;
+}
+
+.chess-piece.white {
+  @apply text-slate-100 drop-shadow-md;
+}
+
+.chess-piece.black {
+  @apply text-slate-800 drop-shadow-md;
+}
+
+/* SVG Chess Pieces */
+.chess-piece-svg {
+  @apply w-full h-full p-1 transition-all duration-300 hover:scale-105 cursor-pointer;
+}
+
+.chess-piece-svg.moving {
+  @apply z-10 scale-110 drop-shadow-lg;
+  transition: transform 300ms ease-in-out;
+}
+
+/* Force pieces to remain black/white regardless of theme */
+.piece-white svg g {
+  fill: #ffffff !important;
+  stroke: #000000 !important;
+}
+
+.piece-black svg g {
+  fill: #000000 !important;
+  stroke: #ffffff !important;
+}
+
+/* Add visibility shadows for dark mode */
+.piece-white svg {
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.piece-black svg {
+  filter: drop-shadow(1px 1px 2px rgba(255, 255, 255, 0.2));
+}
+
+/* Dark mode adjustments for pieces - keep pieces black/white but add visibility */
+.dark .piece-white svg {
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+}
+
+.dark .piece-black svg {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8)) drop-shadow(1px 1px 2px rgba(255, 255, 255, 0.6));
+}
+
+/* Move animations */
+@keyframes piece-move {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.chess-square.move-animation {
+  animation: piece-move 300ms ease-in-out;
+}
+
+/* Game layout */
+.game-layout {
+  @apply grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto;
+}
+
+.game-sidebar {
+  @apply lg:col-span-1 space-y-3 sm:space-y-4 order-2 lg:order-1;
+}
+
+.game-board-container {
+  @apply lg:col-span-2 flex flex-col items-center order-1 lg:order-2;
+}
+
+.game-info {
+  @apply lg:col-span-1 space-y-3 sm:space-y-4 order-3;
+}
+
+/* Captured pieces */
+.captured-pieces {
+  @apply flex flex-wrap gap-1 min-h-[2rem] p-2 bg-slate-50 dark:bg-slate-800 rounded border;
+}
+
+.captured-piece {
+  @apply text-lg opacity-75;
+}
+
+/* Toast animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus,
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Accessibility improvements */
+
+/* Enhanced focus indicators for WCAG AA compliance (3:1 contrast ratio) */
+/* Minimum 2px outline on all screen sizes to meet accessibility requirements */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Ensure focus ring is visible in both light and dark modes */
+.dark *:focus-visible {
+  outline-color: hsl(var(--ring));
+  outline-width: 2px;
+}
+
+/* Ensure touch targets meet WCAG 2.1 minimum 44x44px requirement */
+/* Note: Individual components should set min-height/min-width explicitly */
+/* This is a fallback for any buttons that don't have explicit sizing */
+button:not(.chess-square):not([class*="inline"]),
+a[role="button"]:not([class*="inline"]),
+input[type="button"]:not([class*="inline"]),
+input[type="submit"]:not([class*="inline"]),
+input[type="reset"]:not([class*="inline"]),
+[role="button"]:not(.chess-square):not([class*="inline"]) {
+  min-height: 44px;
+}
+
+/* Chess squares are handled separately - they scale with board size and are always accessible */
+.chess-square {
+  min-height: auto;
+  min-width: auto;
+  /* Chess squares maintain accessibility through proper sizing and keyboard navigation */
+}
+
+/* Skip link focus styles (already defined inline but ensure visibility) */
+a[href="#main-content"]:focus {
+  outline: 3px solid hsl(var(--primary));
+  outline-offset: 4px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chess-piece,
+  .chess-square,
+  .animate-slide-in {
+    @apply transition-none;
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

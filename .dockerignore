@@ -1,0 +1,62 @@
+# Dependencies
+app/node_modules
+app/.pnpm-store
+
+# Build outputs
+app/.next
+app/out
+app/build
+app/dist
+
+# Testing
+app/coverage
+app/playwright-report
+app/.lighthouseci
+
+# Development files
+app/.env.local
+app/.env.development.local
+app/.env.test.local
+app/.env.production.local
+
+# Database files
+app/*.db
+app/*.db-journal
+app/data/*.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+app/*.md
+app/INSTRUCTIONS.md
+app/TESTING.md
+app/ARCHITECTURE.md
+
+# CI/CD
+.github
+
+# Logs
+app/logs
+app/*.log
+app/npm-debug.log*
+app/yarn-debug.log*
+app/yarn-error.log*
+app/pnpm-debug.log*
+
+# Misc
+app/.swc
+app/tsconfig.tsbuildinfo
