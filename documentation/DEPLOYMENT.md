@@ -157,68 +157,6 @@ pm2 save
 pm2 startup
 ```
 
-## GitHub Deployment
-
-### GitHub Actions
-
-Set up GitHub Actions for automated deployment:
-
-**File**: `.github/workflows/deploy.yml`
-
-```yaml
-name: Deploy
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      
-      - name: Install pnpm
-        run: npm install -g pnpm
-      
-      - name: Install dependencies
-        run: |
-          cd front/app
-          pnpm install
-      
-      - name: Build
-        run: |
-          cd front/app
-          pnpm build
-      
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /path/to/blockchess
-            git pull
-            cd front/app
-            pnpm install
-            pnpm build
-            pm2 restart blockchess
-```
-
-### GitHub Secrets
-
-Configure these secrets in GitHub repository settings:
-
-- `HOST`: Server IP address
-- `USERNAME`: SSH username
-- `SSH_KEY`: Private SSH key
-
 ## Production Checklist
 
 ### Before Deployment

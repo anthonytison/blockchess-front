@@ -303,25 +303,14 @@ beforeEach(async () => {
 });
 ```
 
-## Continuous Integration
+## Running Tests Manually
 
-### GitHub Actions
+Tests should be run manually before committing changes:
 
-Tests run automatically on:
-
-- Pull requests
-- Pushes to main branch
-- Scheduled runs
-
-### Test Commands in CI
-
-```yaml
-- name: Run tests
-  run: |
-    cd front/app
-    pnpm install
-    pnpm test:ci
-    pnpm test:e2e
+```bash
+cd app
+pnpm test:ci      # Run unit tests
+pnpm test:e2e     # Run end-to-end tests
 ```
 
 ## Debugging Tests

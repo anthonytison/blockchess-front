@@ -12,7 +12,14 @@ A decentralized chess game built on the Sui blockchain, combining on-chain game 
 I'm a passionate fullstack engineer with expertise in modern web technologies, blockchain development. BlockChess is my first try with the blockchain. I tried to combine traditional game mechanics with blockchain technology to create an engaging, decentralized gaming experience.
 
 ## Version 
-**1.1**
+**1.2**
+
+### Version 1.2 Changes
+- **Documentation Updates**: Added missing documentation files and improved organization
+  - Added RxJS Migration guide
+  - Updated deployment documentation
+  - Removed GitHub Actions references
+- **CI/CD Changes**: Removed GitHub Actions workflows in favor of manual deployment
 
 ### Version 1.1 Changes
 - **WebSocket Integration**: Real-time communication with ws-server for transaction processing
@@ -85,6 +92,7 @@ The architecture supports multiple database backends (PostgreSQL and SQLite) thr
 - **[TESTS.md](./documentation/TESTS.md)** - Testing documentation and how to run tests
 - **[DEPLOYMENT.md](./documentation/DEPLOYMENT.md)** - Deployment guide
 - **[EASTER_EGGS.md](./documentation/EASTER_EGGS.md)** - Hidden features and easter eggs
+- **[RXJS_MIGRATION.md](./documentation/RXJS_MIGRATION.md)** - RxJS migration guide for Socket.IO events
 
 ## Quick Start
 

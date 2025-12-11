@@ -1,5 +1,38 @@
 # Changelog - BlockChess Frontend
 
+## [1.2] - 2024
+
+### Added
+- **RxJS Migration Documentation**: Added comprehensive documentation for the RxJS migration
+  - Complete guide on migrating from direct Socket.IO to RxJS observables
+  - Architecture patterns and best practices
+  - Migration examples and code samples
+  - See [RXJS_MIGRATION.md](./documentation/RXJS_MIGRATION.md)
+
+### Changed
+- **Documentation Structure**: Updated documentation index in README.md
+  - Added missing documentation files to the documentation section
+  - Improved documentation organization
+
+### Removed
+- **GitHub Actions**: Removed GitHub Actions workflows and CI/CD automation
+  - Removed automated deployment workflows
+  - Removed CI test automation
+  - Manual deployment process now recommended
+  - See [DEPLOYMENT.md](./documentation/DEPLOYMENT.md) for manual deployment instructions
+
+### Documentation
+- Added [RXJS_MIGRATION.md](./documentation/RXJS_MIGRATION.md) - Complete guide to RxJS migration
+- Updated [DEPLOYMENT.md](./documentation/DEPLOYMENT.md) - Removed GitHub Actions references
+- Updated [TESTS.md](./documentation/TESTS.md) - Removed GitHub Actions CI references
+
+### Notes
+- **Breaking Change**: CI/CD automation via GitHub Actions is no longer available
+- Manual deployment and testing processes should be followed
+- All documentation files are now properly indexed in README.md
+
+---
+
 ## [1.1] - 2024
 
 ### Added
