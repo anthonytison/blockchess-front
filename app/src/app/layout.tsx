@@ -6,7 +6,6 @@ import { FontProvider } from "@/app/context/font-provider";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getLocale } from "next-intl/server";
 import { SuiProviders } from "@/app/context/providers";
-import { MintQueueProcessor } from "@/components/mint-queue-processor";
 import { SocketListener } from "@/components/socket-listener";
 import { ToastProvider } from "@/app/context/toast-provider";
 import Header from "@/components/ui/structure/header";
@@ -218,7 +217,6 @@ export default async function RootLayout({
             <NextIntlClientProvider messages={messages}>
               <ToastProvider>
                 <SocketListener />
-                <MintQueueProcessor />
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"

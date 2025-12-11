@@ -120,6 +120,15 @@
 .chess-square {
   @apply aspect-square flex items-center justify-center relative cursor-pointer transition-all duration-200 hover:brightness-110;
   transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  outline: none !important;
+}
+
+.chess-square:focus {
+  outline: none !important;
+}
+
+.chess-square:focus-visible {
+  outline: none !important;
 }
 
 .chess-square.light {
@@ -132,9 +141,7 @@
 
 .chess-square.selected {
   @apply ring-2 sm:ring-4 ring-blue-500 ring-inset bg-blue-100 dark:bg-blue-200;
-  /* Ensure focus indicator is always visible for accessibility */
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline: none !important;
 }
 
 .chess-square.legal-move {
@@ -143,9 +150,7 @@
 
 .chess-square.legal-capture {
   @apply ring-2 sm:ring-4 ring-red-500 ring-inset after:content-[''] after:absolute after:w-full after:h-full after:border-2 sm:after:border-4 after:border-red-500 after:rounded-full after:opacity-50;
-  /* Ensure focus indicator is always visible for accessibility */
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline: none !important;
 }
 
 .chess-square.last-move {

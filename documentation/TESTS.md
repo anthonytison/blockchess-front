@@ -26,6 +26,8 @@ Test individual functions and components in isolation.
 - Utility functions
 - React hooks
 - Use cases
+- RxJS socket service
+- Observable subscriptions
 
 **Run**:
 ```bash
@@ -44,6 +46,8 @@ Test interactions between components and modules.
 - Database operations
 - API routes
 - Service integrations
+- Socket.IO event handling with RxJS
+- Transaction flow with observables
 
 **Run**:
 ```bash

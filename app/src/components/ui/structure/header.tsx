@@ -1,7 +1,7 @@
 'use client'
 
+import dynamic from 'next/dynamic';
 import { ThemeToggle } from "@/components/ui/structure/navigation/theme-toggle";
-import { LanguageSwitcher } from "@/components/ui/structure/navigation/language-switcher";
 import SuiConnect from "@/components/ui/structure/navigation/sui-connect";
 import { MobileMenu } from "@/components/ui/structure/navigation/mobile-menu";
 import { useTranslations } from 'next-intl';
@@ -9,6 +9,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import NavAccount from "./navigation/account";
+
+const LanguageSwitcher = dynamic(
+  () => import("@/components/ui/structure/navigation/language-switcher").then(mod => ({ default: mod.LanguageSwitcher })),
+  { ssr: false }
+);
 
 const Header = () => {
 

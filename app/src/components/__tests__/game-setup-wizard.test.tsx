@@ -4,13 +4,13 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { GameSetupWizard } from '../game-setup/game-setup-wizard';
-import { useMintQueue } from '@/app/context/mint-queue-provider';
+import { useMintQueue } from '@/hooks/use-mint-queue';
 import { useToast } from '@/app/context/toast-provider';
 import { useBlockchain } from '@/hooks/blockchain';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 
 // Mock dependencies
-jest.mock('@/app/context/mint-queue-provider');
+jest.mock('@/hooks/use-mint-queue');
 jest.mock('@/app/context/toast-provider');
 jest.mock('@/hooks/blockchain');
 jest.mock('@mysten/dapp-kit');

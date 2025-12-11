@@ -429,3 +429,38 @@ export const forfeitGame = async (params: ForfeitGameParams) => {
     throw new Error('Failed to forfeit game');
   }
 };
+
+export interface UpdateGameObjectIdParams {
+  gameId: string;
+  objectId: string;
+}
+
+export const updateGameObjectId = async (params: UpdateGameObjectIdParams): Promise<void> => {
+  if (!params.gameId || typeof params.gameId !== 'string') {
+    throw new Error('gameId is required');
+  }
+
+  if (!params.objectId || typeof params.objectId !== 'string') {
+    throw new Error('objectId is required');
+  }
+
+  try {
+    const gameRepo = getGameRepository();
+    
+    const game = await gameRepo.getById(params.gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    await gameRepo.updateGameState(params.gameId, {
+      objectId: params.objectId });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === 'Game not found') {
+        throw new Error('Game not found');
+      }
+      throw new Error(error.message || 'Failed to update game objectId');
+    }
+    throw new Error('Failed to update game objectId');
+  }
+};

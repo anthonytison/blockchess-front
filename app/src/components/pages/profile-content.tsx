@@ -69,9 +69,7 @@ export function ProfileContent() {
       if (!result) {
         throw new Error("Failed to update profile");
       } else {
-
         if(newPlayer.name === "Andy"){
-          console.log(`%c☠️ Andy! You Goonie!`, 'background-color:black;color:white;font-weight:bold;padding:15px;')
           showSuccess('☠️ Andy! You Goonie!');
         }
         

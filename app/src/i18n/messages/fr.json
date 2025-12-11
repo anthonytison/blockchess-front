@@ -314,10 +314,12 @@
 	},
 	"toast": {
 		"gameCreated": "Partie créée avec succès",
+		"gameCreatedOnBlockchain": "Partie créée avec succès sur la blockchain",
 		"gameEnded": "Partie terminée avec succès",
 		"gameForfeited": "Partie perdue par abandon",
 		"forfeitFailed": "Échec de l'abandon de la partie",
 		"nftMinted": "NFT récompense ({type}) créé avec succès",
+		"transactionSuccess": "Transaction terminée avec succès",
 		"transactionFailed": "Transaction échouée",
 		"moveFailed": "Échec du mouvement"
 	},

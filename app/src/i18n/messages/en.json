@@ -314,10 +314,12 @@
 	},
 	"toast": {
 		"gameCreated": "Game created successfully",
+		"gameCreatedOnBlockchain": "Game created successfully on blockchain",
 		"gameEnded": "Game ended successfully",
 		"gameForfeited": "Game forfeited",
 		"forfeitFailed": "Failed to forfeit game",
 		"nftMinted": "NFT reward ({type}) minted successfully",
+		"transactionSuccess": "Transaction completed successfully",
 		"transactionFailed": "Transaction failed",
 		"moveFailed": "Failed to make move"
 	},

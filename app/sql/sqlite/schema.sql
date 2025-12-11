@@ -96,3 +96,27 @@ CREATE INDEX IF NOT EXISTS idx_rewards_object_id ON rewards(object_id);
 CREATE INDEX IF NOT EXISTS idx_rewards_created_at ON rewards(created_at);
 CREATE INDEX IF NOT EXISTS idx_rewards_player_type ON rewards(player_id, reward_type);
 
+-- ============================================
+-- TRANSACTION_QUEUE TABLE
+-- ============================================
+-- Stores blockchain transactions in a queue for processing
+CREATE TABLE IF NOT EXISTS transaction_queue (
+    id TEXT PRIMARY KEY,
+    transaction_type TEXT NOT NULL,  -- 'create_game', 'make_move', 'end_game', 'mint_nft'
+    player_sui_address TEXT,
+    game_id TEXT,  -- For create_game updates
+    player_id TEXT,  -- For mint_nft updates
+    status TEXT NOT NULL,  -- 'pending', 'processing', 'completed', 'failed', 'waiting_for_object_id'
+    transaction_data TEXT NOT NULL,  -- Full transaction data stored as JSON string
+    error_message TEXT,
+    created_at INTEGER NOT NULL,  -- Unix timestamp (milliseconds)
+    updated_at INTEGER NOT NULL,  -- Unix timestamp (milliseconds)
+    processed_at INTEGER,  -- Unix timestamp (milliseconds), nullable
+    retries INTEGER DEFAULT 0
+);
+
+-- Indexes for transaction_queue table
+CREATE INDEX IF NOT EXISTS idx_transaction_queue_status ON transaction_queue(status);
+CREATE INDEX IF NOT EXISTS idx_transaction_queue_player ON transaction_queue(player_sui_address);
+CREATE INDEX IF NOT EXISTS idx_transaction_queue_created ON transaction_queue(created_at);
+

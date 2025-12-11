@@ -1,7 +1,4 @@
-'use server'
-
 import { query } from '@/adapters/postgres/database';
-import { emitToPlayer } from '@/lib/socket-server';
 import { rewardsList } from '@/lib/blockchain/rewards';
 
 interface CompleteMintParams {
@@ -49,19 +46,8 @@ export async function POST(request: Request) {
         [taskId]
       );
 
-      // Emit socket event to notify client about successful mint
-      if (playerSuiAddress) {
-        try {
-          emitToPlayer(playerSuiAddress, 'mint-completed', {
-            taskId,
-            rewardType,
-            rewardName,
-            objectId: objectId || null,
-          });
-        } catch (error) {
-          // Don't fail if socket fails
-        }
-      }
+      // Note: Socket event emission for mint-completed is handled by the WebSocket server
+      // The client will receive notifications through the socket connection
 
       return Response.json({
         success: true,

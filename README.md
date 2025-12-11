@@ -11,12 +11,17 @@ A decentralized chess game built on the Sui blockchain, combining on-chain game 
 
 I'm a passionate fullstack engineer with expertise in modern web technologies, blockchain development. BlockChess is my first try with the blockchain. I tried to combine traditional game mechanics with blockchain technology to create an engaging, decentralized gaming experience.
 
-## Version
-**1.0.0** 
-<p>
-Chess game with blockchain interactions. The blockchain transaction are paid by the current user (according to his turn) and saved instantly or delayed through a simple queue line. 
-This transaction process will be updated soon for having the transactions sponsored and for making them totally asynchronous during the game.
-</p>
+## Version 
+**1.1**
+
+### Version 1.1 Changes
+- **WebSocket Integration**: Real-time communication with ws-server for transaction processing
+- **Transaction Sponsoring**: All blockchain transactions now processed via ws-server (users don't pay gas)
+- **Queue System Migration**: Queue processing moved from frontend to ws-server for better reliability
+- **Enhanced Architecture**: Improved clean architecture compliance and separation of concerns
+- **Badge Registry Tools**: Scripts for finding and managing badge registry on-chain
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed changes. 
 
 ## Game Concept
 

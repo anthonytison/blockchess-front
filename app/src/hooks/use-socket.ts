@@ -16,11 +16,14 @@ export function useSocket() {
       return;
     }
 
-    // Connect to Socket.io server
-    const socket = io(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3050', {
-      path: '/api/socket.io',
-      transports: ['websocket', 'polling'],
-    });
+    // Connect to standalone Socket.io server
+    const socket = io(
+      process.env.NEXT_PUBLIC_WS_SERVER_URL || 'http://localhost:3001',
+      {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+      }
+    );
 
     socketRef.current = socket;
 

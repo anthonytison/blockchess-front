@@ -2,16 +2,16 @@
 
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import { GameState } from '@/domain/entities';
-import { endGameTransaction, moveTransaction, packageId } from '@/lib/sui-transactions';
-import { useSignAndExecuteTransaction, useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { Chess, Square } from 'chess.js';
-import { Transaction } from '@mysten/sui/transactions';
-import { SuiTransactionBlockResponse } from '@mysten/sui/client';
-import { useMintQueue } from '@/hooks/use-mint-queue';
 import { useToast } from '@/app/context/toast-provider';
 import { getPlayer } from '@/app/actions/account';
 import { DateTime } from 'luxon';
 import { useTranslations } from 'next-intl';
+import { useSocketRxJS } from '@/hooks/use-socket-rxjs';
+import { useMintQueue } from '@/hooks/use-mint-queue';
+import { MakeMoveTransactionData, EndGameTransactionData, TransactionResult } from '@/types/transactions';
+import { filter, take } from 'rxjs/operators';
 
 // Browser-compatible hash function
 async function hashString(str: string): Promise<string> {
@@ -56,7 +56,8 @@ type GameAction =
   | { type: 'SET_AI_THINKING'; payload: boolean }
   | { type: 'SET_CAPTURED_PIECES'; payload: { white: string[]; black: string[] } }
   | { type: 'UPDATE_BOARD_STATE'; payload: { fen: string; turn: 'w' | 'b'; isCheck: boolean; isCheckmate: boolean; isDraw?: boolean } }
-  | { type: 'ADD_MOVE'; payload: { move: any; newFen: string; newTurn: 'w' | 'b' } };
+  | { type: 'ADD_MOVE'; payload: { move: any; newFen: string; newTurn: 'w' | 'b' } }
+  | { type: 'UPDATE_GAME_OBJECT_ID'; payload: string };
 
 // Initial State
 const initialState: GameContextState = {
@@ -176,6 +177,19 @@ function gameReducer(state: GameContextState, action: GameAction): GameContextSt
         currentMoveIndex: state.gameState.moves.length + 1,
       };
 
+    case 'UPDATE_GAME_OBJECT_ID':
+      if (!state.gameState) return state;
+      return {
+        ...state,
+        gameState: {
+          ...state.gameState,
+          game: {
+            ...state.gameState.game,
+            objectId: action.payload,
+          },
+        },
+      };
+
     default:
       return state;
   }
@@ -192,44 +206,25 @@ interface GameProviderProps {
 
 export function GameProvider({ children, gameId }: GameProviderProps) {
 
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const currentAccount = useCurrentAccount();
-  const suiClient = useSuiClient();
+  const { emit, transactionResult$ } = useSocketRxJS();
+  const { enqueueMint: enqueueMintSocket } = useMintQueue();
 
-  const { enqueueMint } = useMintQueue();
+  // Use socket-based minting (emits nftMint event to server)
+  const enqueueMint = useCallback(async (rewardType: string, player: { id: string; suiAddress: string }) => {
+    if (!player?.id || !player?.suiAddress) {
+      return;
+    }
+    try {
+      await enqueueMintSocket(rewardType, player);
+    } catch (error) {
+      console.error('Error enqueuing mint:', error);
+    }
+  }, [enqueueMintSocket]);
   
   const { showSuccess, showError } = useToast();
   
   const t = useTranslations();
-
-  // Standalone waitForTransaction function to avoid Suspense boundary issues
-  const waitForTransaction = useCallback(async (
-    digest: string, 
-    maxRetries = 15, 
-    delay = 1000
-  ): Promise<SuiTransactionBlockResponse | null> => {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const txResponse = await suiClient.getTransactionBlock({
-          digest,
-          options: {
-            showEffects: true,
-            showObjectChanges: true,
-            showInput: true,
-            showEvents: true,
-            showBalanceChanges: true,
-          },
-        });
-        return txResponse;
-      } catch (error: any) {
-        if (i === maxRetries - 1) throw error;
-        console.log(`Transaction not indexed yet, retrying in ${delay}ms... (attempt ${i + 1}/${maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 1.5; // Exponential backoff
-      }
-    }
-    return null;
-  }, [suiClient]);
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
@@ -266,7 +261,7 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
     }
   }, []);
 
-  // Shared function to process and save a move (blockchain-first, then database)
+  // Shared function to process and save a move (database-first, then blockchain via Socket.IO)
   const processMoveToBlockchainAndDatabase = useCallback((
     moveSan: string,
     newFen: string,
@@ -274,14 +269,13 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
     isAiMove: boolean = false,
     gameEndInfo?: { isGameOver: boolean; winner: string | null; result: string; winnerAddress: string | null }
   ): Promise<void> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!state.gameState) {
         reject(new Error('No game state'));
         return;
       }
 
-      // Check if wallet is connected
-      if (!currentAccount) {
+      if (!currentAccount?.address) {
         const errorMsg = isAiMove 
           ? 'Please connect your wallet to record AI moves on the blockchain'
           : 'Please connect your wallet to make moves';
@@ -293,239 +287,219 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
         return;
       }
 
-      // Log for clarity
-      // if (isAiMove) {
-      //   console.log('Recording AI move on blockchain using your wallet:', currentAccount.address);
-      // }
+      // Socket connection is handled by useSocketRxJS hook
 
-      // Generate hash for blockchain
-      hashString(`${moveSan}${newFen}`).then(moveHash => {
-        // Create blockchain transaction
-        const transaction = new Transaction();
-
-        moveTransaction(transaction, {
-          gameObjectId: state.gameState!.game.objectId as string,
-          isComputer: isAiMove,
-          moveSan,
-          fen: newFen,
-          moveHash
-        })
+      try {
+        // 1. Save move to database FIRST
+        const { makeMove: makeMoveAction, makeAiMove: makeAiMoveAction } = await import('@/app/actions/game');
         
-        // If game is ending, add end_game call to same transaction
-        if (gameEndInfo?.isGameOver) {
-          console.log('Game ending - adding end_game call to transaction');
-          
-          endGameTransaction(transaction, {
-            gameObjectId: state.gameState!.game.objectId as string,
-            winner: gameEndInfo.winnerAddress,
-            result: gameEndInfo.result,
-            finalFen: newFen,
-          })
+        let moveData;
+        try {
+          if (isAiMove) {
+            moveData = await makeAiMoveAction({
+              gameId,
+              from: moveDetails.from,
+              to: moveDetails.to,
+              san: moveSan,
+              fen: newFen,
+              promotion: moveDetails.promotion,
+            });
+          } else {
+            moveData = await makeMoveAction({
+              gameId,
+              from: moveDetails.from,
+              to: moveDetails.to,
+              san: moveSan,
+              fen: newFen,
+              promotion: moveDetails.promotion,
+            });
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to save move to database';
+          dispatch({ 
+            type: 'SET_ERROR', 
+            payload: errorMessage
+          });
+          reject(new Error(errorMessage));
+          return;
         }
 
-        // Execute blockchain transaction first
-        signAndExecute(
-          { transaction },
-          {
-            onSuccess: async (result) => {
-              try {
-                console.log('Blockchain transaction submitted:', result.digest);
+        // 2. Generate move hash
+        const moveHash = await hashString(`${moveSan}${newFen}`);
 
-                // Wait for transaction to be confirmed on blockchain before saving to database
-                // This ensures moves are only saved after blockchain is updated
-                console.log('Waiting for blockchain transaction confirmation...');
-                const txResponse = await waitForTransaction(result.digest, 15, 1000);
-                
-                if (!txResponse || (txResponse.effects && txResponse.effects.status.status !== "success")) {
-                  throw new Error('Transaction failed or was not confirmed');
-                }
-                
-                console.log('Blockchain transaction confirmed:', result.digest);
+        // 3. Generate transaction ID
+        const transactionId = `make_move-${gameId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-                // After blockchain confirmation, save to database
-                const { makeMove: makeMoveAction, makeAiMove: makeAiMoveAction } = await import('@/app/actions/game');
+        // 4. Check if objectId is available
+        const gameObjectId = state.gameState.game.objectId;
+        
+        if (!gameObjectId) {
+          // Queue move with waiting status - it will be processed when object_id is available
+          const transactionData: MakeMoveTransactionData = {
+            transactionId,
+            playerAddress: currentAccount.address,
+            data: {
+              gameObjectId: '', // Will be filled when object_id is available
+              isComputer: isAiMove,
+              moveSan,
+              fen: newFen,
+              moveHash,
+              gameId, // Add gameId so server can identify the game
+            }
+          };
+          
+          emit('transaction:make_move', {
+            ...transactionData,
+            status: 'waiting_for_object_id', // Special status
+          });
+          
+          // Move is saved to DB, just waiting for object_id
+          resolve();
+          return;
+        }
+
+        // 5. Emit transaction event to Socket.IO server (objectId is available)
+        const transactionData: MakeMoveTransactionData = {
+          transactionId,
+          playerAddress: currentAccount.address,
+          data: {
+            gameObjectId,
+            isComputer: isAiMove,
+            moveSan,
+            fen: newFen,
+            moveHash,
+          }
+        };
+        
+        emit('transaction:make_move', transactionData);
+
+        // If game is ending, also emit end_game transaction
+        if (gameEndInfo?.isGameOver) {
+          const endGameTransactionId = `end_game-${gameId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          const endGameData: EndGameTransactionData = {
+            transactionId: endGameTransactionId,
+            playerAddress: currentAccount.address,
+            data: {
+              gameObjectId: state.gameState.game.objectId,
+              winner: gameEndInfo.winnerAddress,
+              result: gameEndInfo.result as '1-0' | '0-1' | '1/2-1/2',
+              finalFen: newFen,
+            }
+          };
+          emit('transaction:end_game', endGameData);
+        }
+
+        // 5. Update UI optimistically
+        const boardState = 'boardState' in moveData ? moveData.boardState : undefined;
+        const isDraw = boardState && 'isDraw' in boardState ? (boardState.isDraw as boolean) : false;
+        dispatch({
+          type: 'UPDATE_BOARD_STATE',
+          payload: {
+            fen: boardState?.fen || newFen,
+            turn: boardState?.turn || (newFen.split(' ')[1] as 'w' | 'b'),
+            isCheck: boardState?.isCheck || false,
+            isCheckmate: boardState?.isCheckmate || false,
+            isDraw,
+          },
+        });
+
+        // Add move to history
+        if (!state.gameState) {
+          reject(new Error('Game state not available'));
+          return;
+        }
+        
+        const moveToAdd = moveData.move || {
+          gameId,
+          moveNumber: state.gameState.moves.length + 1,
+          from: moveDetails.from,
+          to: moveDetails.to,
+          san: moveSan,
+          fen: newFen,
+          timestamp: new Date().toISOString(),
+          playerColor: (newFen.split(' ')[1] === 'w' ? 'black' : 'white') as 'white' | 'black',
+        };
+        
+        dispatch({
+          type: 'ADD_MOVE',
+          payload: {
+            move: moveToAdd,
+            newFen,
+            newTurn: newFen.split(' ')[1] as 'w' | 'b',
+          },
+        });
+
+        // Update captured pieces if provided
+        if (moveData.capturedPieces) {
+          dispatch({
+            type: 'SET_CAPTURED_PIECES',
+            payload: moveData.capturedPieces,
+          });
+        }
+
+        // 6. Set up listener for transaction result (one-time)
+        transactionResult$
+          .pipe(
+            filter((result) => 
+              result.transactionId === transactionId || 
+              (gameEndInfo?.isGameOver && result.transactionId?.startsWith('end_game'))
+            ),
+            take(1)
+          )
+          .subscribe((result) => {
+            if (result.status === 'success') {
+              // Move already saved, just confirm
+              if (gameEndInfo?.isGameOver && gameEndInfo?.winnerAddress) {
+                showSuccess(t('toast.gameEnded'));
                 
-                let moveData;
-                try {
-                  if (isAiMove) {
-                    moveData = await makeAiMoveAction({
-                      gameId,
-                      from: moveDetails.from,
-                      to: moveDetails.to,
-                      san: moveSan,
-                      fen: newFen,
-                      promotion: moveDetails.promotion,
-                    });
-                  } else {
-                    moveData = await makeMoveAction({
-                      gameId,
-                      from: moveDetails.from,
-                      to: moveDetails.to,
-                      san: moveSan,
-                      fen: newFen,
-                      promotion: moveDetails.promotion,
-                    });
-                  }
-                } catch (error) {
-                  const errorMessage = error instanceof Error ? error.message : 'Failed to save move to database';
-                  
-                  // Reload game state to resync after error
-                  console.log('Move failed, reloading game state to resync...');
+                // Wait for database view to refresh and retry if needed
+                const attemptEnqueueMint = async (retries = 3, delay = 3000) => {
                   try {
-                    await loadGame(gameId);
-                  } catch (reloadError) {
-                    console.warn('Failed to reload game state after error:', reloadError);
-                  }
-                  
-                  dispatch({ 
-                    type: 'SET_ERROR', 
-                    payload: errorMessage
-                  });
-                  reject(new Error(errorMessage));
-                  return;
-                }
-
-                console.log('Response from database:', moveData);
-
-                  // Update board state
-                  const boardState = 'boardState' in moveData ? moveData.boardState : undefined;
-                  const isDraw = boardState && 'isDraw' in boardState ? (boardState.isDraw as boolean) : false;
-                  dispatch({
-                    type: 'UPDATE_BOARD_STATE',
-                    payload: {
-                      fen: boardState?.fen || newFen,
-                      turn: boardState?.turn || (newFen.split(' ')[1] as 'w' | 'b'),
-                      isCheck: boardState?.isCheck || false,
-                      isCheckmate: boardState?.isCheckmate || false,
-                      isDraw,
-                    },
-                  });
-
-                  // Add move to history
-                  // Ensure move object has all required fields
-                  if (!state.gameState) {
-                    reject(new Error('Game state not available'));
-                    return;
-                  }
-                  
-                  const moveToAdd = moveData.move || {
-                    gameId,
-                    moveNumber: state.gameState.moves.length + 1,
-                    from: moveDetails.from,
-                    to: moveDetails.to,
-                    san: moveSan,
-                    fen: newFen,
-                    timestamp: new Date().toISOString(),
-                    playerColor: (newFen.split(' ')[1] === 'w' ? 'black' : 'white') as 'white' | 'black', // The player who just moved
-                  };
-                  
-                  dispatch({
-                    type: 'ADD_MOVE',
-                    payload: {
-                      move: moveToAdd,
-                      newFen,
-                      newTurn: newFen.split(' ')[1] as 'w' | 'b',
-                    },
-                  });
-
-                  // Update captured pieces if provided
-                  if (moveData.capturedPieces) {
-                    dispatch({
-                      type: 'SET_CAPTURED_PIECES',
-                      payload: moveData.capturedPieces,
-                    });
-                  }
-
-                  // Check if game ended and database has been updated with winner
-                  // The API response confirms the database transaction is complete
-                  if (gameEndInfo?.isGameOver && gameEndInfo?.winnerAddress && 'isGameOver' in moveData && moveData.isGameOver && 'winner' in moveData && moveData.winner) {
-                    console.log('Game ended - database updated with winner:', moveData.winner);
-                    
-                    // Show success toast for game ended
-                    showSuccess(t('toast.gameEnded'));
-                    
-                    // Wait longer for the database view to refresh with the new win count
-                    // PostgreSQL views may need more time to reflect the updated game state
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    try {
-                      const player = await getPlayer(gameEndInfo.winnerAddress);
-                      if (player) {
-                        console.log('Enqueuing reward mint for player:', player);
-                        // Enqueue in background queue - won't block game state reload
-                        // The mint queue will handle retries if the view hasn't updated yet
-                        enqueueMint("wins", player);
-                      } else {
-                        console.warn('Player not found for address:', gameEndInfo.winnerAddress);
-                      }
-                    } catch (error) {
-                      console.error('Error getting player or enqueuing mint:', error);
-                      // Don't reject the promise - game move was successful, reward minting is secondary
+                    const player = await getPlayer(gameEndInfo.winnerAddress);
+                    if (player) {
+                      console.log(`[GameContext] Enqueuing wins reward mint for player ${player.id} after game end (attempt ${4 - retries}/3)`);
+                      await enqueueMint("wins", player);
+                    }
+                  } catch (error) {
+                    console.error(`[GameContext] Error enqueuing mint (${retries} retries left):`, error);
+                    if (retries > 0) {
+                      setTimeout(() => attemptEnqueueMint(retries - 1, delay), delay);
                     }
                   }
-
-                  // No need to reload game state - we already have the updated state from the server action
-                  // The state has been updated optimistically via dispatch actions above
-                  // This prevents visual glitches and provides smooth transitions
-                  resolve();
-              } catch (err) {
-                console.error('Error saving to database:', err);
-                const error = t('toast.moveFailed');
+                };
                 
-                // Show error toast
-                showError(error);
-                
-                // Reload game state to resync after error
-                console.log('Move failed, reloading game state to resync...');
-                try {
-                  await loadGame(gameId);
-                } catch (reloadError) {
-                  console.warn('Failed to reload game state after error:', reloadError);
-                }
-                
-                dispatch({ 
-                  type: 'SET_ERROR', 
-                  payload: error
-                });
-                reject(err);
+                setTimeout(() => attemptEnqueueMint(), 3000);
               }
-            },
-            onError: (error: any) => {
-              // Extract error message properly - handle empty objects or missing messages
-              const errorMessage = error?.message || 
-                                  error?.toString() || 
-                                  (typeof error === 'string' ? error : 'Unknown error');
-              console.error('Blockchain transaction failed:', errorMessage, error);
-              const errorMsg = t('toast.transactionFailed');
-              
-              // Show error toast
-              showError(errorMsg);
-              
-              // Reload game state to resync after blockchain error
-              console.log('Blockchain transaction failed, reloading game state to resync...');
+              resolve();
+            } else {
+              // Revert move in UI by reloading game state
+              console.log('Transaction failed, reverting move...');
               loadGame(gameId).catch((reloadError) => {
-                console.warn('Failed to reload game state after blockchain error:', reloadError);
+                console.warn('Failed to reload game state after error:', reloadError);
               });
-              
+              showError(result.error || t('toast.transactionFailed'));
               dispatch({ 
                 type: 'SET_ERROR', 
-                payload: errorMsg
+                payload: result.error || t('toast.transactionFailed')
               });
-              reject(new Error(errorMsg));
-            },
-          }
-        );
-      }).catch(err => {
-        console.error('Error generating hash:', err);
-        const error = 'Failed to process move';
+              reject(new Error(result.error || t('toast.transactionFailed')));
+            }
+          });
+
+        // Resolve immediately (optimistic update)
+        // Transaction result will be handled by the listener
+        resolve();
+      } catch (err) {
+        console.error('Error processing move:', err);
+        const error = err instanceof Error ? err.message : 'Failed to process move';
         dispatch({ 
           type: 'SET_ERROR', 
           payload: error
         });
         reject(err);
-      });
+      }
     });
-  }, [state.gameState, gameId, signAndExecute, currentAccount, suiClient, enqueueMint, waitForTransaction, loadGame, showSuccess, showError, t]);
+  }, [state.gameState, gameId, transactionResult$, currentAccount, enqueueMint, loadGame, showSuccess, showError, t]);
 
   // Make a move
   const makeMove = useCallback(async (from: string, to: string, promotion?: string) => {
@@ -594,10 +568,15 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
           
           if (state.gameState.game.mode === 'solo') {
             winner = winningColor === player1Color ? 'player1' : 'computer';
-            winnerAddress = winningColor === player1Color ? (currentAccount?.address || null) : null;
+            winnerAddress = winningColor === player1Color ? (state.gameState.game.player1?.suiAddress || currentAccount?.address || null) : null;
           } else {
             winner = winningColor === player1Color ? 'player1' : 'player2';
-            winnerAddress = currentAccount?.address || null; // Current player won
+            // Get the correct winner's address based on which player won
+            if (winner === 'player1') {
+              winnerAddress = state.gameState.game.player1?.suiAddress || null;
+            } else {
+              winnerAddress = state.gameState.game.player2?.suiAddress || null;
+            }
           }
           
           result = winningColor === 'white' ? '1-0' : '0-1';
@@ -846,162 +825,118 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
       
       const currentFen = state.gameState.boardState.fen;
       
-      // Create blockchain transaction to end the game
-      const transaction = new Transaction();
-      
-      endGameTransaction(transaction, {
-        gameObjectId: state.gameState.game.objectId as string,
-        winner: winnerAddress,
-        result,
-        finalFen: currentFen,
-      });
-      
-      // Execute blockchain transaction
-      signAndExecute(
-        { transaction },
-        {
-          onSuccess: async (txResult) => {
-            try {
-              console.log('Forfeit game transaction successful:', txResult.digest);
-              
-              // Update database to mark game as finished
-              const { forfeitGame: forfeitGameAction } = await import('@/app/actions/game');
-              
-              try {
-                console.log('Updating database with forfeit:', { gameId, winner, result, finalFen: currentFen });
-                await forfeitGameAction({
-                  gameId,
-                  winner,
-                  result,
-                  finalFen: currentFen,
-                });
-                console.log('Database updated successfully with forfeit');
-              } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Failed to update game in database';
-                console.error('Error updating database:', errorMessage, error);
-                
-                // Reload game state to resync after error
-                await loadGame(gameId);
-                
-                dispatch({ 
-                  type: 'SET_ERROR', 
-                  payload: errorMessage
-                });
-                return;
-              }
-              
-              // Update game state
-              dispatch({
-                type: 'UPDATE_BOARD_STATE',
-                payload: {
-                  fen: currentFen,
-                  turn: state.gameState!.boardState.turn,
-                  isCheck: false,
-                  isCheckmate: false,
-                  isDraw: false,
-                },
-              });
-              
-              // Reload game to get updated state
-              await loadGame(gameId);
-              
-              showSuccess(t('toast.gameForfeited'));
-              
-              // If there's a winner and they're a human player, enqueue reward mint
-              if (winner && winner !== 'computer' && winner !== 'draw' && winnerAddress) {
-                try {
-                  const player = await getPlayer(winnerAddress);
-                  if (player) {
-                    enqueueMint("wins", player);
-                  }
-                } catch (error) {
-                  console.error('Error getting player or enqueuing mint:', error);
-                }
-              }
-            } catch (err) {
-              console.error('Error processing forfeit:', err);
-              const error = t('toast.forfeitFailed');
-              showError(error);
-              await loadGame(gameId);
-              dispatch({ 
-                type: 'SET_ERROR', 
-                payload: error
-              });
-            }
-          },
-          onError: async (error: any) => {
-            // Handle empty error object or error with no useful info
-            // If error is empty object or has no enumerable properties, just proceed
-            const errorKeys = error ? Object.keys(error) : [];
-            const isEmptyError = !error || (typeof error === 'object' && errorKeys.length === 0);
-            
-            if (isEmptyError) {
-              console.warn('Forfeit transaction failed - Empty error object, proceeding with database update');
-            } else {
-              console.error('Forfeit transaction failed - Error:', error);
-            }
-            
-            // Even if blockchain transaction fails, still update database since timer expired
-            // The game should be marked as finished regardless of blockchain success
-            try {
-              console.log('Attempting to update database despite blockchain transaction failure', {
-                gameId,
-                winner,
-                result,
-                finalFen: currentFen
-              });
-              
-              const { forfeitGame: forfeitGameAction } = await import('@/app/actions/game');
-              
-              await forfeitGameAction({
-                gameId,
-                winner,
-                result,
-                finalFen: currentFen,
-              });
-              
-              console.log('Database updated successfully despite blockchain failure');
-              
-              // Reload game to get updated state
-              await loadGame(gameId);
-              
-              // Show success message - game was saved even though blockchain failed
-              // The game result is still correct in the database
-              showSuccess(t('toast.gameForfeited'));
-              
-              // Clear any error state since we successfully saved to database
-              dispatch({ 
-                type: 'SET_ERROR', 
-                payload: null
-              });
-              
-              // Don't show error toast for blockchain failure since we saved to database
-              // The game result is still correct
-              return; // Exit early - don't show blockchain error
-            } catch (dbError) {
-              console.error('Failed to update database after transaction failure:', dbError);
-              const dbErrorMessage = dbError instanceof Error ? dbError.message : 'Failed to update game in database';
-              
-              // Reload game state anyway
-              loadGame(gameId).catch((reloadError) => {
-                console.warn('Failed to reload game state after forfeit error:', reloadError);
-              });
-              
-              showError(dbErrorMessage);
-              dispatch({ 
-                type: 'SET_ERROR', 
-                payload: dbErrorMessage
-              });
-            }
-          },
+      // Socket connection is handled by useSocketRxJS hook
+
+      if (!state.gameState.game.objectId) {
+        dispatch({ 
+          type: 'SET_ERROR', 
+          payload: 'Game objectId not available'
+        });
+        return;
+      }
+
+      try {
+        // 1. Update database to mark game as finished FIRST
+        const { forfeitGame: forfeitGameAction } = await import('@/app/actions/game');
+        
+        try {
+          console.log('Updating database with forfeit:', { gameId, winner, result, finalFen: currentFen });
+          await forfeitGameAction({
+            gameId,
+            winner,
+            result,
+            finalFen: currentFen,
+          });
+          console.log('Database updated successfully with forfeit');
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update game in database';
+          console.error('Error updating database:', errorMessage, error);
+          
+          // Reload game state to resync after error
+          await loadGame(gameId);
+          
+          dispatch({ 
+            type: 'SET_ERROR', 
+            payload: errorMessage
+          });
+          return;
         }
-      );
+        
+        // 2. Emit end_game transaction event
+        const transactionId = `end_game-${gameId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        const endGameData: EndGameTransactionData = {
+          transactionId,
+          playerAddress: currentAccount.address,
+          data: {
+            gameObjectId: state.gameState.game.objectId,
+            winner: winnerAddress,
+            result: result as '1-0' | '0-1' | '1/2-1/2',
+            finalFen: currentFen,
+          }
+        };
+        emit('transaction:end_game', endGameData);
+        
+        // 3. Update game state optimistically
+        dispatch({
+          type: 'UPDATE_BOARD_STATE',
+          payload: {
+            fen: currentFen,
+            turn: state.gameState.boardState.turn,
+            isCheck: false,
+            isCheckmate: false,
+            isDraw: false,
+          },
+        });
+        
+        // 4. Reload game to get updated state
+        await loadGame(gameId);
+        
+        showSuccess(t('toast.gameForfeited'));
+        
+        // 5. If there's a winner and they're a human player, enqueue reward mint
+        // Wait a bit for database view to refresh
+        if (winner && winner !== 'computer' && winner !== 'draw' && winnerAddress) {
+          setTimeout(async () => {
+            try {
+              const player = await getPlayer(winnerAddress);
+              if (player) {
+                console.log(`[GameContext] Enqueuing wins reward mint for player ${player.id} after forfeit`);
+                await enqueueMint("wins", player);
+              }
+            } catch (error) {
+              console.error('Error getting player or enqueuing mint:', error);
+            }
+          }, 5000);
+        }
+        
+        // 6. Subscribe to transaction result (optional - game is already saved)
+        const subscription = transactionResult$
+          .pipe(
+            filter((result) => result.transactionId === transactionId),
+            take(1)
+          )
+          .subscribe((result) => {
+            if (result.status === 'error') {
+              // Game is already saved, just log the error
+              console.warn('Forfeit blockchain transaction failed, but game was saved:', result.error);
+            }
+          });
+      } catch (err) {
+        console.error('Error processing forfeit:', err);
+        const error = t('toast.forfeitFailed');
+        showError(error);
+        await loadGame(gameId);
+        dispatch({ 
+          type: 'SET_ERROR', 
+          payload: error
+        });
+      }
     } catch (err) {
       console.error('Error forfeiting game:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to forfeit game';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
     }
-  }, [state.gameState, state.isReplayMode, state.isAiThinking, currentAccount, gameId, signAndExecute, loadGame, showSuccess, showError, t, enqueueMint]);
+  }, [state.gameState, state.isReplayMode, state.isAiThinking, currentAccount, gameId, emit, transactionResult$, loadGame, showSuccess, showError, t, enqueueMint]);
 
   // Auto-trigger AI moves
   useEffect(() => {
@@ -1026,6 +961,39 @@ export function GameProvider({ children, gameId }: GameProviderProps) {
   useEffect(() => {
     loadGame(gameId);
   }, [gameId, loadGame]);
+
+  // Listen for object_id updates from create_game transactions
+  useEffect(() => {
+    const subscription = transactionResult$
+      .pipe(
+        filter((result) => 
+          result.status === 'success' && 
+          result.objectId && 
+          state.gameState?.game.id === gameId &&
+          !state.gameState?.game.objectId
+        )
+      )
+      .subscribe(async (result) => {
+        if (result.objectId) {
+          console.log(`[GameContext] Received object_id update: ${result.objectId} for game ${gameId}`);
+          
+          // Update gameState transparently with new object_id
+          dispatch({
+            type: 'UPDATE_GAME_OBJECT_ID',
+            payload: result.objectId,
+          });
+          
+          // Reload game to ensure state is in sync
+          try {
+            await loadGame(gameId);
+          } catch (error) {
+            console.error('[GameContext] Failed to reload game after object_id update', error);
+          }
+        }
+      });
+
+    return () => subscription.unsubscribe();
+  }, [gameId, state.gameState?.game.id, state.gameState?.game.objectId, transactionResult$, loadGame]);
 
   const contextValue: GameContextType = {
     ...state,

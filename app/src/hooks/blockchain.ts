@@ -235,7 +235,6 @@ export function useBlockchain() {
       }
       
       const objectId = responseObject.objectId;
-      console.log('Extracted objectId:', objectId);
       return objectId;
     }
 
@@ -294,15 +293,153 @@ export function useBlockchain() {
 
               const allEvents: TransactionBlock[] = results.data?.transactionBlocks?.nodes || [];
 
-              return { data: allEvents };
+              if (allEvents.length > 0) {
+                return { data: allEvents };
+              }
             } catch (err) {
+              // GraphQL query failed, falling back to SuiClient
             }
           }
           
-          return { data: [] as TransactionBlock[] };
+          // Fallback: Use SuiClient to query events by game object ID
+          try {
+            // Try complex query first
+            let eventsResult;
+            try {
+              eventsResult = await suiClient.queryEvents({
+                query: {
+                  All: [
+                    {
+                      Any: [
+                        { MoveEventType: `${packageId}::game::GameCreated` },
+                        { MoveEventType: `${packageId}::game::PlayerJoined` },
+                        { MoveEventType: `${packageId}::game::MovePlayed` },
+                        { MoveEventType: `${packageId}::game::GameCancelled` },
+                        { MoveEventType: `${packageId}::game::GameEnded` },
+                      ],
+                    },
+                    {
+                      MoveEventField: {
+                        path: '/game_id',
+                        value: gameObjectId,
+                      },
+                    },
+                  ],
+                } as any,
+                limit: 100,
+                order: 'ascending',
+              });
+            } catch (queryError) {
+              // Fallback: query module and filter client-side
+              try {
+                const result = await suiClient.queryEvents({
+                  query: {
+                    MoveEventModule: {
+                      package: packageId!,
+                      module: 'game',
+                    },
+                  },
+                  limit: 1000,
+                  order: 'ascending',
+                });
+                
+                // Filter client-side by game_id
+                eventsResult = {
+                  ...result,
+                  data: result.data.filter((event: any) => {
+                    return event.parsedJson?.game_id === gameObjectId;
+                  }),
+                };
+              } catch (fallbackError) {
+                // Both queries failed, log and return empty result
+                console.error('[useLoadEvents] Both query attempts failed:', {
+                  originalError: queryError,
+                  fallbackError: fallbackError,
+                  gameObjectId,
+                  packageId,
+                });
+                // Return empty result instead of throwing
+                eventsResult = {
+                  data: [],
+                  nextCursor: null,
+                  hasNextPage: false,
+                };
+              }
+            }
+
+            // Get transaction digests from events
+            const digests = new Set<string>();
+            eventsResult.data.forEach((event: SuiEvent) => {
+              if (event.id.txDigest) {
+                digests.add(event.id.txDigest);
+              }
+            });
+
+            // Fetch full transaction blocks for each digest
+            const transactionBlocks: TransactionBlock[] = [];
+            for (const digest of Array.from(digests)) {
+              try {
+                const txBlock = await suiClient.getTransactionBlock({
+                  digest,
+                  options: {
+                    showEffects: true,
+                    showEvents: true,
+                    showInput: false,
+                  },
+                });
+
+                // Transform to TransactionBlock format
+                if (txBlock.effects && txBlock.events) {
+                  const transformedBlock: TransactionBlock = {
+                    digest: txBlock.digest,
+                    bcs: '',
+                    signatures: txBlock.transaction?.data?.txSignatures || [],
+                    sender: txBlock.transaction?.data?.sender ? { address: txBlock.transaction.data.sender } : undefined,
+                    effects: {
+                      events: {
+                        nodes: txBlock.events.map((event: SuiEvent) => {
+                          // Convert timestamp from milliseconds to ISO string
+                          const timestamp = event.timestampMs 
+                            ? new Date(Number(event.timestampMs)).toISOString()
+                            : '';
+                          return {
+                            bcs: '',
+                            timestamp,
+                            contents: {
+                              type: {
+                                repr: event.type,
+                              },
+                              json: event.parsedJson as ResultJson,
+                            },
+                          };
+                        }),
+                      },
+                    },
+                  };
+                  transactionBlocks.push(transformedBlock);
+                }
+              } catch (err) {
+                // Failed to fetch transaction block, skipping
+              }
+            }
+
+            // Sort by timestamp (most recent first)
+            transactionBlocks.sort((a, b) => {
+              const timeA = a.effects?.events?.nodes[0]?.timestamp || '';
+              const timeB = b.effects?.events?.nodes[0]?.timestamp || '';
+              return timeB.localeCompare(timeA);
+            });
+
+            return { data: transactionBlocks };
+          } catch (err) {
+            console.error('[useLoadEvents] Failed to query events using SuiClient', err);
+            return { data: [] as TransactionBlock[] };
+          }
         },
         refetchInterval: !isCheckmate ? 10000 : false,
         enabled: !!packageId && !!gameObjectId,
+        staleTime: 0, // Always consider data stale to ensure fresh fetch on mount
+        gcTime: 30000, // Keep in cache for 30 seconds
       });
 
       const events = useMemo(() => {
@@ -377,7 +514,7 @@ export function useBlockchain() {
 
               return { data: events };
             } catch (err) {
-              console.warn('GraphQL query failed, using fallback', err);
+              // GraphQL query failed, using fallback
             }
           }
           
@@ -433,21 +570,16 @@ export function useBlockchain() {
     const mintNft = async (type: string, player: PlayerEntity | null): Promise<string> => {
       return new Promise(async (resolve, reject) => {
         if(typeof player?.suiAddress === 'undefined') {
-          console.warn('[mintNft] Player Sui address is undefined');
           resolve('');
           return;
         }
         
         try {
-          console.log(`[mintNft] Checking if reward should be earned: type=${type}, player=${player?.suiAddress}`);
           const rewardToEarn: string | null = await shouldEarnReward(player?.suiAddress as string, type);
           if (!rewardToEarn) {
-            console.log(`[mintNft] Reward ${type} should not be earned (already earned or not eligible)`);
             resolve('');
             return;
           }
-
-          console.log(`[mintNft] Reward to earn: ${rewardToEarn}`);
           
           // Find reward by badge_type (what shouldEarnReward returns) instead of conditions.check
           const reward: RewardConfig | undefined  = rewardsList.find(reward => reward.nft.badge_type === rewardToEarn);
@@ -465,29 +597,22 @@ export function useBlockchain() {
             return;
           }
 
-          console.log(`[mintNft] Creating mint transaction for ${reward.nft.name} (${reward.nft.badge_type})`);
           const txMintFirstGame: Transaction = mintNftTransaction(reward.nft, player.suiAddress);
-          console.log('[mintNft] Transaction created, signing and executing...');
           await signAndExecuteTransaction({ transaction: txMintFirstGame }, {
             onSuccess: async (result) => {
               try {
-                console.log(`[mintNft] Transaction successful, digest: ${result.digest}`);
                 const objectId: string = await validateTransaction({
                   digest: result.digest,
                   objectType: '::badge::Badge',
                   type: 'created',
                   errorMessage: 'badgeObjectNotFound'
                 });
-
-                console.log(`[mintNft] Badge object ID: ${objectId}`);
                 
                 await saveReward({
                   type: rewardToEarn, // Use badge_type (e.g., "first_game_won") instead of "wins"
                   playerId: player?.id as string,
                   objectId
                 })
-                
-                console.log(`[mintNft] Reward saved to database`);
                 
                 // Show success toast for NFT minted with reward name (not badge_type)
                 showSuccess(t('toast.nftMinted', { type: reward.nft.name }));
@@ -659,7 +784,6 @@ export function useBlockchain() {
             };
             } catch (graphqlErr: any) {
               // GraphQL failed - fallback to RPC
-              console.log('GraphQL query failed, falling back to RPC');
             }
           }
           

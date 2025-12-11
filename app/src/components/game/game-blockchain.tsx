@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Clock } from "lucide-react";
 import { DateTime } from "luxon"
 import { ResultJson, TransactionBlock, useBlockchain } from "@/hooks/blockchain";
+import { useEffect, useRef } from "react";
 
 interface Props {
   className?: string
@@ -21,12 +22,23 @@ const GameBlockchain = ({ className }: Props) => {
   const { useLoadEvents } = useBlockchain();
 
   const gameId: string | undefined = gameState?.game.id;
+  const gameObjectId = gameState?.game.objectId as string;
+  const previousObjectIdRef = useRef<string | undefined>(undefined);
 
   // Load events from blockchain (fetches moves, extracts digests, and loads events)
-  const { events, isLoading, error } = useLoadEvents(
-    gameState?.game.objectId as string,
+  const { events, isLoading, error, refetch } = useLoadEvents(
+    gameObjectId,
     gameState?.boardState.isCheckmate as boolean
   );
+
+  // Refetch events when gameObjectId becomes available or changes
+  useEffect(() => {
+    if (gameObjectId && gameObjectId !== previousObjectIdRef.current) {
+      previousObjectIdRef.current = gameObjectId;
+      // Trigger a refetch to ensure we get the latest events
+      refetch();
+    }
+  }, [gameObjectId, refetch]);
 
   if (!gameState) return null;
 
@@ -80,14 +92,24 @@ const GameBlockchain = ({ className }: Props) => {
                           <time dateTime="2020-09-20">{DateTime.fromISO(txBlock.effects?.events.nodes[0]?.timestamp as string).toFormat('dd/LL/yyyy HH:ii:ss')}</time>
                         </div>
                         <div className="text-right text-sm whitespace-nowrap">
-                          {t(`type.${txBlock.effects?.events?.nodes[0]?.contents.type.repr.replace(/(.+)::game::/gi, '').toLowerCase()}`)} {t('by')} 
-                          {txBlock.effects?.events?.nodes[0]?.contents.type.repr.endsWith('GameCreated') ?
-                            displayPlayerName(txBlock)
-                          : txBlock.effects?.events?.nodes[0]?.contents.type.repr.endsWith('MovePlayed') && gameState.game.mode === "solo" ?
-                            displayPlayerName(txBlock)
-                          : txBlock.effects?.events?.nodes[0]?.contents.type.repr.endsWith('GameEnded') ?
-                            displayPlayerName(txBlock)
-                          : ""}
+                          {(() => {
+                            const typeRepr = txBlock.effects?.events?.nodes[0]?.contents?.type?.repr;
+                            if (!typeRepr) return null;
+                            
+                            const typeKey = typeRepr.replace(/(.+)::game::/gi, '').toLowerCase();
+                            return (
+                              <>
+                                {t(`type.${typeKey}`)} {t('by')} 
+                                {typeRepr.endsWith('GameCreated') ?
+                                  displayPlayerName(txBlock)
+                                : typeRepr.endsWith('MovePlayed') && gameState.game.mode === "solo" ?
+                                  displayPlayerName(txBlock)
+                                : typeRepr.endsWith('GameEnded') ?
+                                  displayPlayerName(txBlock)
+                                : ""}
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
